@@ -6,24 +6,25 @@ Student ka apna data context mein diya jata hai.
 
 import google.generativeai as genai
 from typing import List, Dict, Optional
-import streamlit as st
-
-# ─────────────────────────────────────────────────────────────────────────────
-#  API KEY — Streamlit Secrets se lo
-# ─────────────────────────────────────────────────────────────────────────────
-GEMINI_API_KEY = st.secrets.get("GEMINI_API_KEY", "")
 
 
 # ─────────────────────────────────────────────────────────────────────────────
 #  SETUP
 # ─────────────────────────────────────────────────────────────────────────────
-def init_gemini(api_key: str = GEMINI_API_KEY):
-    """Gemini API ko initialize karo."""
-    genai.configure(api_key=api_key)
+def _get_api_key() -> str:
+    try:
+        import streamlit as st
+        return st.secrets.get("GEMINI_API_KEY", "")
+    except Exception:
+        return ""
+
+
+def init_gemini(api_key: str = ""):
+    key = api_key or _get_api_key()
+    genai.configure(api_key=key)
 
 
 def get_model():
-    """Gemini 1.5 Flash model return karo."""
     return genai.GenerativeModel(
         model_name="gemini-1.5-flash-latest",
         generation_config={
@@ -51,7 +52,6 @@ def build_student_context(
     department:    str = "",
     semester:      str = "",
 ) -> str:
-    # Topics by subject
     subjects_info = ""
     for sub in subjects:
         sub_topics = [t for t in all_topics if t.get("subject") == sub]
@@ -65,12 +65,10 @@ def build_student_context(
                 )
             subjects_info += f"\n📗 {sub}:\n" + "\n".join(topics_list)
 
-    # Sessions summary
     total_logged  = sum(s.get("hours", 0) for s in sessions)
     session_count = len(sessions)
     recent_topics = list({s["topic"] for s in sessions[-5:]}) if sessions else []
 
-    # Goal info
     goal_info = "No goal set yet."
     if goal:
         goal_info = (
@@ -79,7 +77,6 @@ def build_student_context(
             f"Weekly Hours: {goal.get('weekly_hours',0)}h"
         )
 
-    # Stats
     total_topics    = len(all_topics)
     completed_count = len(completed)
     weak_count      = len(weak_areas)
@@ -110,4 +107,116 @@ Total Topics : {total_topics}
 Completed    : {completed_count} ({completion_pct}%)
 Pending      : {pending_count}
 Weak Areas   : {weak_count} → {', '.join(weak_areas) if weak_areas else 'None'}
-Goal         : {goal_inf
+Goal         : {goal_info}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SUBJECTS & TOPICS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+{subjects_info if subjects_info else 'No topics added yet.'}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SESSION HISTORY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Total Sessions    : {session_count}
+Total Hours Logged: {total_logged:.1f}h
+Recently Studied  : {', '.join(recent_topics) if recent_topics else 'No sessions yet'}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+YOUR ROLE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+- Help {display_name} understand their topics
+- Give study tips for weak areas: {', '.join(weak_areas) if weak_areas else 'none'}
+- Suggest what to study next based on their schedule
+- Motivate them based on their progress ({completion_pct}% done)
+- Answer academic questions related to their subjects
+- Help them plan their study time ({hours_per_day}h/day)
+- If they ask in Urdu, reply in Urdu. If English, reply in English.
+""".strip()
+
+    return context
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+#  CHAT FUNCTION
+# ─────────────────────────────────────────────────────────────────────────────
+def chat_with_ai(
+    user_message:    str,
+    chat_history:    List[Dict],
+    student_context: str,
+    api_key:         str = "",
+) -> str:
+    try:
+        init_gemini(api_key)
+        model = get_model()
+
+        history_with_context = [
+            {"role": "user",  "parts": [student_context]},
+            {"role": "model", "parts": [
+                "Understood! I'm StudyFlow AI, ready to help this student "
+                "with their personalized study plan and academic questions."
+            ]},
+        ] + chat_history
+
+        chat     = model.start_chat(history=history_with_context)
+        response = chat.send_message(user_message)
+        return response.text
+
+    except Exception as e:
+        err = str(e)
+        if "API_KEY" in err.upper() or "api key" in err.lower():
+            return "❌ **Invalid API Key.** Please check your Gemini API key in the AI Assistant settings."
+        elif "quota" in err.lower() or "429" in err:
+            return "⚠️ **Rate limit reached.** Please wait a moment and try again."
+        elif "network" in err.lower() or "connection" in err.lower():
+            return "🌐 **Connection error.** Please check your internet connection."
+        else:
+            return f"❌ **Error:** {err}"
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+#  QUICK SUGGESTION PROMPTS
+# ─────────────────────────────────────────────────────────────────────────────
+def get_quick_prompts(
+    weak_areas: List[str],
+    subjects:   List[str],
+    pending:    List[str],
+) -> List[str]:
+    prompts = []
+
+    if weak_areas:
+        prompts.append(f"📖 Explain {weak_areas[0]} in simple words")
+        if len(weak_areas) > 1:
+            prompts.append(f"📝 Give me practice tips for {weak_areas[1]}")
+
+    if subjects:
+        prompts.append(f"📅 Make a study plan for {subjects[0]}")
+
+    if pending:
+        prompts.append(f"🚀 How should I start studying {pending[0]}?")
+
+    prompts += [
+        "💪 Motivate me to study today",
+        "⏰ How can I manage my study time better?",
+        "🧠 What is the best technique to memorize topics?",
+        "📊 Analyze my progress and give me feedback",
+    ]
+
+    return prompts[:6]
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+#  API KEY VALIDATOR
+# ─────────────────────────────────────────────────────────────────────────────
+def validate_api_key(api_key: str = "") -> tuple[bool, str]:
+    try:
+        init_gemini(api_key)
+        model    = get_model()
+        response = model.generate_content("Say OK")
+        if response.text:
+            return True, "✅ API key is valid!"
+        return False, "❌ No response from Gemini."
+    except Exception as e:
+        err = str(e)
+        if "API_KEY" in err.upper() or "invalid" in err.lower():
+            return False, "❌ Invalid API key. Please check and try again."
+        return False, f"❌ Error: {err}"
