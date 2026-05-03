@@ -6,25 +6,29 @@ Student ka apna data context mein diya jata hai.
 
 import google.generativeai as genai
 from typing import List, Dict, Optional
+import streamlit as st
+
+# ─────────────────────────────────────────────────────────────────────────────
+#  API KEY — Streamlit Secrets se lo
+# ─────────────────────────────────────────────────────────────────────────────
+GEMINI_API_KEY = st.secrets.get("GEMINI_API_KEY", "")
 
 
 # ─────────────────────────────────────────────────────────────────────────────
 #  SETUP
 # ─────────────────────────────────────────────────────────────────────────────
-GEMINI_API_KEY = "AIzaSyBVoQtZSUd10hb7mwD6Gl6n06rd6_HSZY8"
-
 def init_gemini(api_key: str = GEMINI_API_KEY):
     """Gemini API ko initialize karo."""
     genai.configure(api_key=api_key)
 
 
 def get_model():
-    """Gemini 2.0 Flash model return karo."""
+    """Gemini 1.5 Flash model return karo."""
     return genai.GenerativeModel(
-        model_name="gemini-1.5-flash",
+        model_name="gemini-1.5-flash-latest",
         generation_config={
-            "temperature":     0.7,
-            "top_p":           0.9,
+            "temperature":       0.7,
+            "top_p":             0.9,
             "max_output_tokens": 1024,
         },
     )
@@ -47,11 +51,6 @@ def build_student_context(
     department:    str = "",
     semester:      str = "",
 ) -> str:
-    """
-    Student ka pura data ek system prompt mein pack karo
-    taake AI assistant personalized jawab de sake.
-    """
-
     # Topics by subject
     subjects_info = ""
     for sub in subjects:
@@ -67,7 +66,7 @@ def build_student_context(
             subjects_info += f"\n📗 {sub}:\n" + "\n".join(topics_list)
 
     # Sessions summary
-    total_logged = sum(s.get("hours", 0) for s in sessions)
+    total_logged  = sum(s.get("hours", 0) for s in sessions)
     session_count = len(sessions)
     recent_topics = list({s["topic"] for s in sessions[-5:]}) if sessions else []
 
@@ -81,11 +80,11 @@ def build_student_context(
         )
 
     # Stats
-    total_topics     = len(all_topics)
-    completed_count  = len(completed)
-    weak_count       = len(weak_areas)
-    pending_count    = total_topics - completed_count
-    completion_pct   = round(completed_count / total_topics * 100, 1) if total_topics else 0
+    total_topics    = len(all_topics)
+    completed_count = len(completed)
+    weak_count      = len(weak_areas)
+    pending_count   = total_topics - completed_count
+    completion_pct  = round(completed_count / total_topics * 100, 1) if total_topics else 0
 
     context = f"""
 You are StudyFlow AI — a personal academic study assistant for the following student.
@@ -111,136 +110,4 @@ Total Topics : {total_topics}
 Completed    : {completed_count} ({completion_pct}%)
 Pending      : {pending_count}
 Weak Areas   : {weak_count} → {', '.join(weak_areas) if weak_areas else 'None'}
-Goal         : {goal_info}
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-SUBJECTS & TOPICS
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-{subjects_info if subjects_info else 'No topics added yet.'}
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-SESSION HISTORY
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Total Sessions   : {session_count}
-Total Hours Logged: {total_logged:.1f}h
-Recently Studied : {', '.join(recent_topics) if recent_topics else 'No sessions yet'}
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-YOUR ROLE
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-- Help {display_name} understand their topics
-- Give study tips for weak areas: {', '.join(weak_areas) if weak_areas else 'none'}
-- Suggest what to study next based on their schedule
-- Motivate them based on their progress ({completion_pct}% done)
-- Answer academic questions related to their subjects
-- Help them plan their study time ({hours_per_day}h/day)
-- If they ask in Urdu, reply in Urdu. If English, reply in English.
-""".strip()
-
-    return context
-
-
-# ─────────────────────────────────────────────────────────────────────────────
-#  CHAT FUNCTION
-# ─────────────────────────────────────────────────────────────────────────────
-def chat_with_ai(
-    user_message:     str,
-    chat_history:     List[Dict],
-    student_context:  str,
-    api_key:          str = GEMINI_API_KEY,
-) -> str:
-    """
-    Gemini se chat karo.
-    chat_history format: [{"role": "user"|"model", "parts": "..."}]
-    Returns: AI ka jawab (string)
-    """
-    try:
-        init_gemini(api_key)
-        model = get_model()
-
-        # System context pehle message ki tarah inject karo
-        history_with_context = [
-            {
-                "role":  "user",
-                "parts": [student_context],
-            },
-            {
-                "role":  "model",
-                "parts": [
-                    f"Understood! I'm StudyFlow AI, ready to help this student "
-                    f"with their personalized study plan and academic questions."
-                ],
-            },
-        ] + chat_history
-
-        chat = model.start_chat(history=history_with_context)
-        response = chat.send_message(user_message)
-        return response.text
-
-    except Exception as e:
-        err = str(e)
-        if "API_KEY" in err.upper() or "api key" in err.lower():
-            return "❌ **Invalid API Key.** Please check your Gemini API key in the AI Assistant settings."
-        elif "quota" in err.lower() or "429" in err:
-            return "⚠️ **Rate limit reached.** Please wait a moment and try again."
-        elif "network" in err.lower() or "connection" in err.lower():
-            return "🌐 **Connection error.** Please check your internet connection."
-        else:
-            return f"❌ **Error:** {err}"
-
-
-# ─────────────────────────────────────────────────────────────────────────────
-#  QUICK SUGGESTION PROMPTS
-# ─────────────────────────────────────────────────────────────────────────────
-def get_quick_prompts(
-    weak_areas:  List[str],
-    subjects:    List[str],
-    pending:     List[str],
-) -> List[str]:
-    """
-    Student ke data ke hisaab se smart quick-prompt buttons banao.
-    """
-    prompts = []
-
-    # Weak area prompts
-    if weak_areas:
-        prompts.append(f"📖 Explain {weak_areas[0]} in simple words")
-        if len(weak_areas) > 1:
-            prompts.append(f"📝 Give me practice tips for {weak_areas[1]}")
-
-    # Subject prompts
-    if subjects:
-        prompts.append(f"📅 Make a study plan for {subjects[0]}")
-
-    # Pending topics
-    if pending:
-        prompts.append(f"🚀 How should I start studying {pending[0]}?")
-
-    # General prompts
-    prompts += [
-        "💪 Motivate me to study today",
-        "⏰ How can I manage my study time better?",
-        "🧠 What is the best technique to memorize topics?",
-        "📊 Analyze my progress and give me feedback",
-    ]
-
-    return prompts[:6]  # Max 6 prompts show karo
-
-
-# ─────────────────────────────────────────────────────────────────────────────
-#  API KEY VALIDATOR
-# ─────────────────────────────────────────────────────────────────────────────
-def validate_api_key(api_key: str = GEMINI_API_KEY) -> tuple[bool, str]:
-    """API key test karo ek simple call se."""
-    try:
-        init_gemini(api_key)
-        model = get_model()
-        response = model.generate_content("Say OK")
-        if response.text:
-            return True, "✅ API key is valid!"
-        return False, "❌ No response from Gemini."
-    except Exception as e:
-        err = str(e)
-        if "API_KEY" in err.upper() or "invalid" in err.lower():
-            return False, "❌ Invalid API key. Please check and try again."
-        return False, f"❌ Error: {err}"
+Goal         : {goal_inf
