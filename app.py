@@ -35,6 +35,7 @@ st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Lora:wght@400;600;700&family=DM+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
 
+
 :root {
   --bg:       #F5F0E8; --bg2:    #EDE8DC; --surface: #FDFAF4;
   --border:   #DDD5C0; --border2:#C8BFA6;
