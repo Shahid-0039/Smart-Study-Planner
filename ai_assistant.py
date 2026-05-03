@@ -1,43 +1,61 @@
 """
 StudyFlow v4 — AI Assistant
-Gemini API se powered personal study assistant.
-Student ka apna data context mein diya jata hai.
+Groq API se powered (Free & Fast!)
 """
 
-import google.generativeai as genai
+from groq import Groq
 from typing import List, Dict, Optional
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-#  SETUP
-# ─────────────────────────────────────────────────────────────────────────────
 def _get_api_key() -> str:
     try:
         import streamlit as st
-        return st.secrets.get("GEMINI_API_KEY", "")
+        return st.secrets.get("GROK_API_KEY", "")
     except Exception:
         return ""
 
 
-def init_gemini(api_key: str = ""):
-    key = api_key or _get_api_key()
-    genai.configure(api_key=key)
+def chat_with_ai(
+    user_message:    str,
+    chat_history:    List[Dict],
+    student_context: str,
+    api_key:         str = "",
+) -> str:
+    try:
+        key = api_key or _get_api_key()
+        client = Groq(api_key=key)
+
+        messages = [{"role": "system", "content": student_context}]
+
+        for msg in chat_history:
+            role = msg["role"]
+            text = msg["parts"][0] if isinstance(msg["parts"], list) else msg["parts"]
+            if role == "model":
+                role = "assistant"
+            messages.append({"role": role, "content": text})
+
+        messages.append({"role": "user", "content": user_message})
+
+        response = client.chat.completions.create(
+            model="llama-3.3-70b-versatile",
+            max_tokens=1024,
+            temperature=0.7,
+            messages=messages,
+        )
+        return response.choices[0].message.content
+
+    except Exception as e:
+        err = str(e)
+        if "401" in err or "auth" in err.lower() or "api_key" in err.lower():
+            return "❌ **Invalid API Key.** Please check your Groq API key."
+        elif "429" in err or "rate" in err.lower():
+            return "⚠️ **Rate limit reached.** Please wait a moment and try again."
+        elif "network" in err.lower() or "connection" in err.lower():
+            return "🌐 **Connection error.** Please check your internet connection."
+        else:
+            return f"❌ **Error:** {err}"
 
 
-def get_model():
-    return genai.GenerativeModel(
-        model_name="gemini-1.5-flash-latest",
-        generation_config={
-            "temperature":       0.7,
-            "top_p":             0.9,
-            "max_output_tokens": 1024,
-        },
-    )
-
-
-# ─────────────────────────────────────────────────────────────────────────────
-#  STUDENT CONTEXT BUILDER
-# ─────────────────────────────────────────────────────────────────────────────
 def build_student_context(
     display_name:  str,
     username:      str,
@@ -83,7 +101,7 @@ def build_student_context(
     pending_count   = total_topics - completed_count
     completion_pct  = round(completed_count / total_topics * 100, 1) if total_topics else 0
 
-    context = f"""
+    return f"""
 You are StudyFlow AI — a personal academic study assistant for the following student.
 Always be helpful, encouraging, and personalized. Use the student's actual data in your answers.
 Respond in the same language the student uses (Urdu or English or mix).
@@ -133,49 +151,7 @@ YOUR ROLE
 - If they ask in Urdu, reply in Urdu. If English, reply in English.
 """.strip()
 
-    return context
 
-
-# ─────────────────────────────────────────────────────────────────────────────
-#  CHAT FUNCTION
-# ─────────────────────────────────────────────────────────────────────────────
-def chat_with_ai(
-    user_message:    str,
-    chat_history:    List[Dict],
-    student_context: str,
-    api_key:         str = "",
-) -> str:
-    try:
-        init_gemini(api_key)
-        model = get_model()
-
-        history_with_context = [
-            {"role": "user",  "parts": [student_context]},
-            {"role": "model", "parts": [
-                "Understood! I'm StudyFlow AI, ready to help this student "
-                "with their personalized study plan and academic questions."
-            ]},
-        ] + chat_history
-
-        chat     = model.start_chat(history=history_with_context)
-        response = chat.send_message(user_message)
-        return response.text
-
-    except Exception as e:
-        err = str(e)
-        if "API_KEY" in err.upper() or "api key" in err.lower():
-            return "❌ **Invalid API Key.** Please check your Gemini API key in the AI Assistant settings."
-        elif "quota" in err.lower() or "429" in err:
-            return "⚠️ **Rate limit reached.** Please wait a moment and try again."
-        elif "network" in err.lower() or "connection" in err.lower():
-            return "🌐 **Connection error.** Please check your internet connection."
-        else:
-            return f"❌ **Error:** {err}"
-
-
-# ─────────────────────────────────────────────────────────────────────────────
-#  QUICK SUGGESTION PROMPTS
-# ─────────────────────────────────────────────────────────────────────────────
 def get_quick_prompts(
     weak_areas: List[str],
     subjects:   List[str],
@@ -187,10 +163,8 @@ def get_quick_prompts(
         prompts.append(f"📖 Explain {weak_areas[0]} in simple words")
         if len(weak_areas) > 1:
             prompts.append(f"📝 Give me practice tips for {weak_areas[1]}")
-
     if subjects:
         prompts.append(f"📅 Make a study plan for {subjects[0]}")
-
     if pending:
         prompts.append(f"🚀 How should I start studying {pending[0]}?")
 
@@ -204,19 +178,20 @@ def get_quick_prompts(
     return prompts[:6]
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-#  API KEY VALIDATOR
-# ─────────────────────────────────────────────────────────────────────────────
 def validate_api_key(api_key: str = "") -> tuple[bool, str]:
     try:
-        init_gemini(api_key)
-        model    = get_model()
-        response = model.generate_content("Say OK")
-        if response.text:
+        key = api_key or _get_api_key()
+        client = Groq(api_key=key)
+        response = client.chat.completions.create(
+            model="llama-3.3-70b-versatile",
+            max_tokens=10,
+            messages=[{"role": "user", "content": "Say OK"}],
+        )
+        if response.choices:
             return True, "✅ API key is valid!"
-        return False, "❌ No response from Gemini."
+        return False, "❌ No response."
     except Exception as e:
         err = str(e)
-        if "API_KEY" in err.upper() or "invalid" in err.lower():
-            return False, "❌ Invalid API key. Please check and try again."
+        if "401" in err or "auth" in err.lower():
+            return False, "❌ Invalid API key."
         return False, f"❌ Error: {err}"
