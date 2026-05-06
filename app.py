@@ -22,7 +22,7 @@ from ai_assistant import (
 #  PAGE CONFIG
 # ─────────────────────────────────────────────────────────────────────────────
 st.set_page_config(
-    page_title="StudyFlow — Smart Study Planner",
+    page_title="Smart Study Planner",
     page_icon="📖",
     layout="wide",
     initial_sidebar_state="expanded",
