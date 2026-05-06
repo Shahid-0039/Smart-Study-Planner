@@ -395,7 +395,7 @@ def show_auth_page():
         login_tab, signup_tab = st.tabs(["🔑  Login", "✨  Sign Up"])
 
         with login_tab:
-            st.markdown("<br>")
+            st.markdown("")
             with st.form("login_form"):
                 l_email = st.text_input("Email Address", placeholder="you@example.com")
                 l_pass  = st.text_input("Password",      type="password", placeholder="••••••••")
@@ -414,7 +414,7 @@ def show_auth_page():
                         st.rerun()
                     else:
                         st.error(f"❌ {msg}")
-            st.markdown("<br>")
+            st.markdown("")
             if st.button("🔓 Forgot Password?", key="fp_btn", use_container_width=True):
                 st.session_state.fp_step = 1
                 st.rerun()
