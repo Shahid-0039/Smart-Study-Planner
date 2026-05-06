@@ -399,7 +399,7 @@ def show_auth_page():
             with st.form("login_form"):
                 l_email = st.text_input("Email Address", placeholder="you@example.com")
                 l_pass  = st.text_input("Password",      type="password", placeholder="••••••••")
-                st.markdown("<br>")
+                st.markdown("")
                 if st.form_submit_button("🔑  Log In", use_container_width=True):
                     ok, msg, user = auth.authenticate(l_email, l_pass)
                     if ok:
@@ -420,7 +420,7 @@ def show_auth_page():
                 st.rerun()
 
         with signup_tab:
-            st.markdown("<br>")
+            st.markdown("")
             with st.form("signup_form", clear_on_submit=True):
                 s_name  = st.text_input("Full Name",         placeholder="Ali Raza")
                 s_email = st.text_input("Email Address",     placeholder="ali@example.com")
@@ -430,7 +430,7 @@ def show_auth_page():
                 s_pass  = sc1.text_input("Password",         type="password", placeholder="Min. 6 chars")
                 s_pass2 = sc2.text_input("Confirm Password", type="password", placeholder="Repeat")
                 s_hrs   = st.slider("Study hours / day", 1, 14, 4)
-                st.markdown("<br>")
+                st.markdown("")
                 if st.form_submit_button("✨  Create Account", use_container_width=True):
                     ok, msg = auth.register(s_email, s_pass, s_pass2, s_name, s_user, s_hrs)
                     if ok:
@@ -439,7 +439,7 @@ def show_auth_page():
                     else:
                         st.error(f"❌ {msg}")
 
-        st.markdown('<div style="text-align:center;font-size:0.75rem;color:#C8BFA6;margin-top:20px">📖 StudyFlow v4</div>', unsafe_allow_html=True)
+        st.markdown('<div style="text-align:center;font-size:0.75rem;color:#C8BFA6;margin-top:20px"></div>', unsafe_allow_html=True)
 
 
 # ─────────────────────────────────────────────────────────────────────────────
