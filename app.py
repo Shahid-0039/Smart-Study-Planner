@@ -758,7 +758,7 @@ with tab2:
         if plan["total_hours"]>avail:
             st.markdown(tip_card(f"⚡ Plan ({plan['total_hours']:.1f}h) exceeds your daily limit ({avail}h). Prioritise Hard topics!","warn"), unsafe_allow_html=True)
 
-        st.markdown("<br>")
+        st.markdown("")
         cm,ce=st.columns(2)
         with cm:
             st.markdown('<div class="session-hdr morning-hdr">🌅 Morning Session</div>', unsafe_allow_html=True)
@@ -785,7 +785,7 @@ with tab2:
             lt=lc1.selectbox("Topic",all_tn,key="log_topic")
             lh=lc2.number_input("Hours",0.25,8.0,1.0,0.25,key="log_hours")
             lm=lc3.selectbox("Mood",["😄 Great","😊 Good","😐 Okay","😓 Tired","😩 Difficult"],key="log_mood")
-            lc4.markdown("<br>")
+            lc4.markdown("")
             if lc4.button("📝 Log"):
                 kg.log_session(username,lt,lh,lm.split()[0]); kg.save()
                 st.success(f"✅ Logged {lh}h for {lt}!"); st.rerun()
@@ -806,7 +806,7 @@ with tab3:
         st.markdown('<div style="font-family:\'Lora\',serif;font-size:1.5rem;font-weight:700;color:#2C2416">🗓️ 7-Day Schedule</div>', unsafe_allow_html=True)
         s1,s2,s3=st.columns(3)
         s1.metric("📊 Weekly Total",f"{th:.1f} hrs"); s2.metric("📅 Daily Avg",f"{th/7:.1f} hrs"); s3.metric("📚 Subjects",len(stats_h["subjects"]))
-        st.markdown("<br>")
+        st.markdown("")
         dc=st.columns(7)
         for i,day in enumerate(weekly):
             with dc[i]:
