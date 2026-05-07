@@ -699,7 +699,7 @@ with tab1:
         ]):
             col.markdown(f'<div class="sf-metric"><div style="position:absolute;top:0;left:0;right:0;height:3px;background:{clr};border-radius:14px 14px 0 0"></div><div style="font-size:1.4rem;margin-bottom:4px">{icon}</div><div class="sf-metric-num" style="color:{clr}">{num}</div><div class="sf-metric-lbl">{lbl}</div></div>', unsafe_allow_html=True)
 
-        st.markdown("<br>")
+        st.markdown("")
         ch1,ch2,ch3 = st.columns([2,2,1])
         with ch1:
             fig = go.Figure(go.Pie(labels=list(diff.keys()),values=list(diff.values()),hole=0.55,
