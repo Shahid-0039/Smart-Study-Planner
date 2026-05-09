@@ -306,7 +306,7 @@ def show_empty_state():
 #  FORGOT PASSWORD FLOW
 # ─────────────────────────────────────────────────────────────────────────────
 def show_forgot_password():
-    st.markdown("### 🔓 Reset Password")
+    st.markdown("###  Reset Password")
 
     # Step 1 — enter email
     if st.session_state.fp_step == 1:
@@ -353,7 +353,7 @@ def show_forgot_password():
             entered = st.text_input("Enter Verification Code", placeholder="6-digit code", max_chars=6)
             np1 = st.text_input("New Password",     type="password", placeholder="Min. 6 chars")
             np2 = st.text_input("Confirm Password", type="password", placeholder="Repeat")
-            if st.form_submit_button("🔑 Reset Password", use_container_width=True):
+            if st.form_submit_button(" Reset Password", use_container_width=True):
                 if entered.strip() != otp:
                     st.error("❌ Incorrect code.")
                 elif np1 != np2:
@@ -392,7 +392,7 @@ def show_auth_page():
             return
 
         # ── Tabs ───────────────────────────────────────────────────────────
-        login_tab, signup_tab = st.tabs(["🔑  Login", "✨  Sign Up"])
+        login_tab, signup_tab = st.tabs(["  Login", "  Sign Up"])
 
         with login_tab:
             st.markdown("")
@@ -400,7 +400,7 @@ def show_auth_page():
                 l_email = st.text_input("Email Address", placeholder="you@example.com")
                 l_pass  = st.text_input("Password",      type="password", placeholder="••••••••")
                 st.markdown("")
-                if st.form_submit_button("🔑  Log In", use_container_width=True):
+                if st.form_submit_button("  Log In", use_container_width=True):
                     ok, msg, user = auth.authenticate(l_email, l_pass)
                     if ok:
                         st.session_state.logged_in    = True
@@ -431,7 +431,7 @@ def show_auth_page():
                 s_pass2 = sc2.text_input("Confirm Password", type="password", placeholder="Repeat")
                 s_hrs   = st.slider("Study hours / day", 1, 14, 4)
                 st.markdown("")
-                if st.form_submit_button("✨  Create Account", use_container_width=True):
+                if st.form_submit_button("  Create Account", use_container_width=True):
                     ok, msg = auth.register(s_email, s_pass, s_pass2, s_name, s_user, s_hrs)
                     if ok:
                         st.success(f"✅ {msg}")
@@ -555,13 +555,13 @@ def show_profile_page():
                     st.error(f"❌ {msg}")
 
     st.divider()
-    st.markdown("### 🔒 Change Password")
+    st.markdown("###  Change Password")
     with st.form("pw_form"):
         cp1, cp2, cp3 = st.columns(3)
         old_pw = cp1.text_input("Current Password", type="password")
         new_pw = cp2.text_input("New Password",     type="password", placeholder="Min. 6 chars")
         cnf_pw = cp3.text_input("Confirm New",      type="password")
-        if st.form_submit_button("🔒 Update Password", use_container_width=True):
+        if st.form_submit_button(" Update Password", use_container_width=True):
             ok_a, _, _ = auth.authenticate(email, old_pw)
             if not ok_a:
                 st.error("❌ Current password is incorrect.")
@@ -694,8 +694,8 @@ with tab1:
             (str(stats["subjects_count"]),     "Subjects",      "📚","#4F46E5"),
             (str(stats["total_topics"]),        "Topics",        "📝","#0EA5E9"),
             (str(stats["completed_count"]),     "Completed",     "✅","#16A34A"),
-            (str(stats["weak_areas_count"]),    "Weak Areas",    "⚠️","#DC2626"),
-            (f"{stats['pending_hours']:.0f}h",  "Hrs Remaining", "⏳","#D97706"),
+            (str(stats["weak_areas_count"]),    "Weak Areas",    "","#DC2626"),
+            (f"{stats['pending_hours']:.0f}h",  "Hrs Remaining", "","#D97706"),
         ]):
             col.markdown(f'<div class="sf-metric"><div style="position:absolute;top:0;left:0;right:0;height:3px;background:{clr};border-radius:14px 14px 0 0"></div><div style="font-size:1.4rem;margin-bottom:4px">{icon}</div><div class="sf-metric-num" style="color:{clr}">{num}</div><div class="sf-metric-lbl">{lbl}</div></div>', unsafe_allow_html=True)
 
@@ -726,7 +726,7 @@ with tab1:
 
         weak = stats["weak_areas"]
         if weak:
-            st.markdown('<div class="sf-section">⚠️ Areas Needing Focus</div>', unsafe_allow_html=True)
+            st.markdown('<div class="sf-section"> Areas Needing Focus</div>', unsafe_allow_html=True)
             cols=st.columns(min(len(weak),4)); all_t=kg.get_all_topics_for_student(username)
             for i,w in enumerate(weak):
                 td=next((t for t in all_t if t["name"]==w),{}); clr=DIFFICULTY_COLOR.get(td.get("difficulty","Easy"),"#888")
@@ -734,11 +734,11 @@ with tab1:
                     st.markdown(f'<div style="background:#FFF7ED;border:1px solid {clr}40;border-top:3px solid {clr};border-radius:12px;padding:16px;text-align:center;margin:4px 0"><div style="font-size:1.4rem">⚠️</div><div style="font-weight:700;color:#1A1310;margin-top:6px;font-size:0.9rem">{w}</div><div style="color:{clr};font-size:0.78rem;font-weight:600">{td.get("difficulty","")}</div><div style="color:#9C8E75;font-size:0.75rem">{td.get("subject","")}</div></div>', unsafe_allow_html=True)
 
         if goal:
-            st.markdown('<div class="sf-section">🎯 Study Goal</div>', unsafe_allow_html=True)
+            st.markdown('<div class="sf-section"> Study Goal</div>', unsafe_allow_html=True)
             try: dl=(datetime.strptime(goal["target_date"],"%Y-%m-%d")-datetime.now()).days
             except: dl="?"
             g1,g2,g3,g4=st.columns(4)
-            for col,lbl,val,clr in [(g1,"🏆 Exam",goal["exam_name"],"#4F46E5"),(g2,"📅 Target",goal["target_date"],"#2C2416"),(g3,"📆 Days Left",str(dl),"#DC2626"),(g4,"⏱ Weekly",f"{goal['weekly_hours']}h","#16A34A")]:
+            for col,lbl,val,clr in [(g1," Exam",goal["exam_name"],"#4F46E5"),(g2,"📅 Target",goal["target_date"],"#2C2416"),(g3,"📆 Days Left",str(dl),"#DC2626"),(g4,"⏱ Weekly",f"{goal['weekly_hours']}h","#16A34A")]:
                 col.markdown(f'<div class="sf-card" style="text-align:center"><div style="font-size:0.7rem;color:#9C8E75;text-transform:uppercase;letter-spacing:0.08em">{lbl}</div><div style="font-family:\'Lora\',serif;font-size:1.1rem;font-weight:700;color:{clr};margin-top:6px">{val}</div></div>', unsafe_allow_html=True)
 
 
@@ -761,21 +761,21 @@ with tab2:
         st.markdown("")
         cm,ce=st.columns(2)
         with cm:
-            st.markdown('<div class="session-hdr morning-hdr">🌅 Morning Session</div>', unsafe_allow_html=True)
+            st.markdown('<div class="session-hdr morning-hdr"> Morning Session</div>', unsafe_allow_html=True)
             if plan["morning"]:
                 for t in plan["morning"]: st.markdown(topic_pill_html(t,weak_a,completed), unsafe_allow_html=True)
             else:
                 st.markdown('<div style="color:#9C8E75;padding:20px;text-align:center;background:#F9F6EF;border-radius:10px;border:1px dashed #DDD5C0">No morning topics</div>', unsafe_allow_html=True)
         with ce:
-            st.markdown('<div class="session-hdr evening-hdr">🌙 Evening Session</div>', unsafe_allow_html=True)
+            st.markdown('<div class="session-hdr evening-hdr"> Evening Session</div>', unsafe_allow_html=True)
             if plan["evening"]:
                 for t in plan["evening"]: st.markdown(topic_pill_html(t,weak_a,completed), unsafe_allow_html=True)
             else:
                 st.markdown('<div style="color:#9C8E75;padding:20px;text-align:center;background:#F9F6EF;border-radius:10px;border:1px dashed #DDD5C0">No evening topics</div>', unsafe_allow_html=True)
 
-        st.markdown('<div class="sf-section">💡 Smart Tips</div>', unsafe_allow_html=True)
+        st.markdown('<div class="sf-section"> Smart Tips</div>', unsafe_allow_html=True)
         for tip in plan["tips"]:
-            kind = "danger" if "🔴" in tip else ("warn" if "⚠" in tip or "⚡" in tip else "info")
+            kind = "danger" if "🔴" in tip else ("warn" if "" in tip or "" in tip else "info")
             st.markdown(tip_card(tip, kind), unsafe_allow_html=True)
 
         st.markdown('<div class="sf-section">📝 Log Study Session</div>', unsafe_allow_html=True)
@@ -817,14 +817,14 @@ with tab3:
                         clr=DIFFICULTY_COLOR.get(t.get("difficulty","Easy"),"#888"); pfx="⚠ " if t["name"] in ww else ("✓ " if t["name"] in dw else "")
                         parts.append(f'<div class="slot-topic" style="border-color:{clr}">{pfx}{t["name"]}</div>')
                     return "".join(parts) or '<div style="color:#C8BFA6;font-size:0.7rem">—</div>'
-                st.markdown(f'<div class="{cc}"><div class="day-name" style="color:{nc}">{day["day"]}</div><div class="day-date">{day["date"]}</div><div class="day-hours">⏱ {day["total_hours"]:.1f}h</div><div style="border-top:1px solid #DDD5C0;padding-top:8px"><div class="slot-hdr" style="color:#92400E">🌅 Morning</div>{si(day["morning"])}<div class="slot-hdr" style="color:#3730A3;margin-top:6px">🌙 Evening</div>{si(day["evening"])}</div></div>', unsafe_allow_html=True)
+                st.markdown(f'<div class="{cc}"><div class="day-name" style="color:{nc}">{day["day"]}</div><div class="day-date">{day["date"]}</div><div class="day-hours">⏱ {day["total_hours"]:.1f}h</div><div style="border-top:1px solid #DDD5C0;padding-top:8px"><div class="slot-hdr" style="color:#92400E"> Morning</div>{si(day["morning"])}<div class="slot-hdr" style="color:#3730A3;margin-top:6px"> Evening</div>{si(day["evening"])}</div></div>', unsafe_allow_html=True)
 
         st.markdown('<div class="sf-section">📋 Full Schedule</div>', unsafe_allow_html=True)
         rows=[]
         for day in weekly:
-            for sn,topics in [("🌅 Morning",day["morning"]),("🌙 Evening",day["evening"])]:
+            for sn,topics in [(" Morning",day["morning"]),(" Evening",day["evening"])]:
                 for t in topics:
-                    rows.append({"Day":day["day"],"Date":day["date"],"Session":sn,"Topic":("⚠️ " if t["name"] in ww else "")+t["name"],"Subject":t.get("subject",""),"Difficulty":DIFFICULTY_ICON.get(t.get("difficulty","Easy"),"")+t.get("difficulty","Easy"),"Hours":t.get("estimated_hours",1)})
+                    rows.append({"Day":day["day"],"Date":day["date"],"Session":sn,"Topic":(" " if t["name"] in ww else "")+t["name"],"Subject":t.get("subject",""),"Difficulty":DIFFICULTY_ICON.get(t.get("difficulty","Easy"),"")+t.get("difficulty","Easy"),"Hours":t.get("estimated_hours",1)})
         if rows:
             df=pd.DataFrame(rows); st.dataframe(df,use_container_width=True,hide_index=True)
             st.download_button("📥 Download CSV",df.to_csv(index=False),file_name=f"plan_{username}_{datetime.now().strftime('%Y%m%d')}.csv",mime="text/csv")
@@ -946,7 +946,7 @@ with tab6:
     # ── Quick prompt buttons ───────────────────────────────────────────────
     quick_prompts = get_quick_prompts(weak_areas, subjects, pending)
 
-    st.markdown("**💡 Quick Questions:**")
+    st.markdown("** Quick Questions:**")
     qp_cols = st.columns(3)
     for i, prompt in enumerate(quick_prompts):
         with qp_cols[i % 3]:
@@ -1015,7 +1015,7 @@ with tab6:
 # ══════════════════════════════════════════════════════════════════════════════
 with tab7:
     st.markdown('<div style="font-family:\'Lora\',serif;font-size:1.5rem;font-weight:700;color:#2C2416">⚙️ Manage Study Data</div>', unsafe_allow_html=True)
-    mt1,mt2,mt3,mt4,mt5 = st.tabs(["📗 Subjects","📚 Topics","⚠️ Weak Areas","🎯 Goals","📋 All Data"])
+    mt1,mt2,mt3,mt4,mt5 = st.tabs(["📗 Subjects","📚 Topics"," Weak Areas"," Goals","📋 All Data"])
 
     # ── SUBJECTS ──────────────────────────────────────────────────────────────
     with mt1:
@@ -1035,7 +1035,7 @@ with tab7:
             sl=list(kg.subjects.keys())
             if sl:
                 ds=st.selectbox("Select",sl,key="del_subj"); tc=len(kg.get_subject_topics(ds))
-                st.markdown(f'<div style="font-size:0.82rem;color:#DC2626;margin:6px 0">⚠️ Will also delete {tc} topic(s).</div>', unsafe_allow_html=True)
+                st.markdown(f'<div style="font-size:0.82rem;color:#DC2626;margin:6px 0"> Will also delete {tc} topic(s).</div>', unsafe_allow_html=True)
                 cf=st.checkbox(f"Confirm delete '{ds}'",key="cf_ds")
                 if st.button("🗑️ Delete",key="del_s"):
                     if cf: kg.remove_subject(ds); kg.save(); st.success(f"✅ Deleted."); st.rerun()
@@ -1049,7 +1049,7 @@ with tab7:
 
     # ── TOPICS ────────────────────────────────────────────────────────────────
     with mt2:
-        if not has_subjects: st.info("💡 Add a subject first.")
+        if not has_subjects: st.info(" Add a subject first.")
         else:
             tc1,tc2=st.columns(2)
             with tc1:
@@ -1083,15 +1083,15 @@ with tab7:
 
     # ── WEAK AREAS ────────────────────────────────────────────────────────────
     with mt3:
-        if not has_subjects: st.info("💡 Add subjects and topics first.")
+        if not has_subjects: st.info(" Add subjects and topics first.")
         else:
             cw=kg.get_weak_areas(username); wc1,wc2=st.columns(2)
             with wc1:
-                st.markdown("#### ⚠️ Mark Weak Area")
+                st.markdown("####  Mark Weak Area")
                 um=[t for t in kg.topics if t not in cw]
                 if um:
                     nwk=st.selectbox("Topic",um,key="wk_sel")
-                    if st.button("⚠️ Mark Weak"):
+                    if st.button(" Mark Weak"):
                         kg.mark_weak_area(username,nwk); kg.save(); st.success(f"'{nwk}' marked!"); st.rerun()
                 else: st.info("All topics are marked as weak.")
             with wc2:
@@ -1108,14 +1108,14 @@ with tab7:
 
     # ── GOALS ─────────────────────────────────────────────────────────────────
     with mt4:
-        st.markdown("#### 🎯 Set Study Goal")
+        st.markdown("####  Set Study Goal")
         eg=kg.get_goal(username); gc1,gc2=st.columns(2)
         with gc1:
             ge=st.text_input("Exam / Goal Name",value=eg["exam_name"] if eg else "",key="goal_exam")
             gh=st.slider("Weekly Hours Target",5,60,int(eg["weekly_hours"]) if eg else 15,key="goal_hrs")
         with gc2:
             gd_=st.date_input("Target Date",key="goal_date")
-            if st.button("🎯 Set Goal"):
+            if st.button(" Set Goal"):
                 kg.set_goal(username,gh,str(gd_),ge); kg.save()
                 st.success(f"✅ Goal set: {ge} by {gd_} ({gh}h/week)"); st.rerun()
         if eg:
