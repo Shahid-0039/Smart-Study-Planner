@@ -10,7 +10,7 @@ from typing import List, Dict, Optional
 def _get_api_key() -> str:
     try:
         import streamlit as st
-        return st.secrets.get("GROK_API_KEY", "")
+        return st.secrets.get("GROQ_API_KEY ", "")
     except Exception:
         return ""
 
