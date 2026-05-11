@@ -534,7 +534,7 @@ def show_profile_page():
             new_bio  = st.text_area("Bio / Study Goals", value=ui.get("bio",""),
                                     height=100, placeholder="Tell us about your study goals...")
             new_hrs  = st.slider("Study hours / day", 1, 14, int(ui.get("hours_per_day", 4)))
-            st.markdown("<br>")
+            st.markdown("")
             if st.form_submit_button("💾 Save Profile", use_container_width=True):
                 ok, msg = auth.update_profile(email, {
                     "display_name": new_dn, "username":     new_un,
@@ -980,7 +980,7 @@ with tab6:
                 else:
                     st.markdown(f'<div class="chat-label-ai">🤖 StudyFlow AI</div><div class="chat-bubble-ai">{text}</div>', unsafe_allow_html=True)
 
-        st.markdown("<br>")
+        st.markdown("")
         if st.button("🗑️ Clear Chat", key="clear_chat"):
             st.session_state.chat_history = []
             st.rerun()
