@@ -1,49 +1,33 @@
-# Smart Study Planner
+# 📚 Smart Study Planner
+
+An AI-powered study companion built with Streamlit that helps students plan their study time, track progress visually, and get contextual guidance from a built-in AI assistant.
+
+![Python](https://img.shields.io/badge/Python-3.x-blue)
+![Streamlit](https://img.shields.io/badge/Streamlit-web%20app-FF4B4B)
+![License](https://img.shields.io/badge/license-MIT-green)
+
+---
+
+## Overview
+
+Smart Study Planner helps students move from "I should study more" to an actual plan. It generates a personalized study timetable, visualizes progress over time, and offers AI-guided suggestions to keep students on track — all through a simple Streamlit interface.
 
 ## Features
-- AI-powered study planning.
-- Customized learning schedules based on user input.
-- Integration with various resources and platforms.
 
-## Installation
-To install the Smart Study Planner, follow these steps:
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/Shahid-0039/Smart-Study-Planner.git
-   ```
-2. Navigate to the project directory:
-   ```bash
-   cd Smart-Study-Planner
-   ```
-3. Install the required dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
+- ✅ **Personalized timetables** generated based on user input (subjects, available time, goals)
+- ✅ **Progress tracking** with visual charts so students can see how they're doing
+- ✅ **AI study assistant** that offers contextual guidance, not just a static schedule
+- ✅ **User authentication** so each student's plan and progress are saved individually
+- ✅ **Knowledge-graph-based structuring** of topics and study materials
 
-## Usage
-To use the Smart Study Planner:
-1. Run the application:
-   ```bash
-   python main.py
-   ```
-2. Follow the on-screen instructions to create your study plan.
+## Tech Stack
 
-## Architecture
-The application is built using a modular architecture that separates the core functionalities:
-- **Frontend**: User interface built using React.
-- **Backend**: REST API developed with Flask.
-- **Database**: PostgreSQL for data storage.
+| Category | Technologies |
+|---|---|
+| **Language** | Python |
+| **Web framework** | Streamlit |
+| **AI / Assistant** | LLM-based guidance (`ai_assistant.py`) |
+| **Data structuring** | Custom knowledge graph (`knowledge_graph.py`) |
+| **Auth** | Custom authentication module (`auth.py`) |
 
-## AI Capabilities
-- Intelligent scheduling utilizing machine learning algorithms.
-- Recommendations based on past performance and preferences.
-- Adaptive learning paths for individual users.
-
-## Contribution Guidelines
-We welcome contributions! Please follow these steps:
-1. Fork the repository.
-2. Create a new branch (`git checkout -b feature/YourFeatureName`).
-3. Make your changes and test.
-4. Submit a pull request explaining your changes.
-
-Thank you for contributing to the Smart Study Planner!
+## Repository Structure
